@@ -1,0 +1,148 @@
+:global(*) { box-sizing: border-box; }
+
+:global(body) {
+  margin: 0;
+  color: #18332d;
+  background: #f5f0e8;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+:global(button), :global(input) { font: inherit; }
+
+.nav {
+  position: absolute;
+  z-index: 2;
+  top: 30px;
+  right: 7vw;
+  display: flex;
+  gap: 8px;
+  padding: 5px;
+  border: 1px solid rgba(24, 51, 45, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 252, 247, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.nav a {
+  padding: 9px 17px;
+  border-radius: 999px;
+  color: #64746e;
+  font: 600 0.8rem/1 'Trebuchet MS', sans-serif;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.nav a:hover, .activeNavLink { color: #18332d; background: #f0c36a; }
+
+.authPage {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(360px, 0.8fr);
+  gap: clamp(50px, 9vw, 150px);
+  align-items: center;
+  min-height: 100vh;
+  padding: 110px 10vw 70px;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(240, 195, 106, 0.45), transparent 27%),
+    linear-gradient(135deg, #f5f0e8 0%, #e9efe7 100%);
+}
+
+.authIntro { max-width: 480px; }
+
+.brandMark {
+  display: inline-grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  margin-bottom: 44px;
+  border-radius: 15px 15px 15px 4px;
+  color: #fffaf0;
+  background: #18332d;
+  font: 700 0.9rem/1 'Trebuchet MS', sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.eyebrow, .formEyebrow {
+  margin: 0 0 15px;
+  color: #bc7d20;
+  font: 700 0.72rem/1.2 'Trebuchet MS', sans-serif;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.authIntro h1 {
+  max-width: 440px;
+  margin: 0;
+  color: #18332d;
+  font-size: clamp(3.2rem, 5.2vw, 5.4rem);
+  font-weight: 400;
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+}
+
+.introCopy {
+  max-width: 380px;
+  margin: 28px 0 0;
+  color: #64746e;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.introRule { width: 64px; height: 2px; margin: 37px 0 17px; background: #d99935; }
+.introNote { margin: 0; color: #789088; font: 0.78rem/1.5 'Trebuchet MS', sans-serif; }
+
+.authCard {
+  width: min(100%, 445px);
+  justify-self: end;
+  padding: clamp(30px, 5vw, 52px);
+  border: 1px solid rgba(24, 51, 45, 0.1);
+  border-radius: 24px;
+  background: rgba(255, 252, 247, 0.84);
+  box-shadow: 0 24px 70px rgba(37, 62, 54, 0.12);
+}
+
+.formHeader h2 { margin: 0; color: #18332d; font-size: 2rem; font-weight: 400; letter-spacing: -0.03em; }
+.formHeader > p:last-child { margin: 10px 0 30px; color: #81908b; font: 0.86rem/1.5 'Trebuchet MS', sans-serif; }
+.formFields { display: flex; flex-direction: column; gap: 9px; }
+
+.input {
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid #d4ddd6;
+  border-radius: 10px;
+  outline: none;
+  color: #18332d;
+  background: #fffdf9;
+  font: 0.92rem 'Trebuchet MS', sans-serif;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.input::placeholder { color: #9aa7a1; }
+.input:focus { border-color: #d99935; box-shadow: 0 0 0 4px rgba(217, 153, 53, 0.14); }
+.formFields p { min-height: 16px; margin: -4px 0 4px; color: #b45142; font: 0.7rem/1.35 'Trebuchet MS', sans-serif; }
+.formFields ol { margin: -4px 0 6px; padding-left: 19px; color: #b45142; font: 0.7rem/1.5 'Trebuchet MS', sans-serif; }
+
+.button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 10px;
+  color: #fffaf0;
+  background: #18332d;
+  font: 700 0.88rem 'Trebuchet MS', sans-serif;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+.button:hover { background: #2b5144; box-shadow: 0 8px 18px rgba(24, 51, 45, 0.18); transform: translateY(-1px); }
+.button:disabled { cursor: wait; opacity: 0.65; transform: none; }
+.formFooter { margin: 21px 0 0; color: #8a9892; font: 0.7rem/1.5 'Trebuchet MS', sans-serif; text-align: center; }
+
+@media (max-width: 760px) {
+  .nav { top: 20px; right: 20px; }
+  .authPage { grid-template-columns: 1fr; gap: 44px; padding: 100px 24px 46px; }
+  .authIntro { max-width: 600px; }
+  .brandMark { margin-bottom: 30px; }
+  .authIntro h1 { font-size: clamp(2.9rem, 13vw, 4.5rem); }
+  .introCopy { margin-top: 20px; }
+  .authCard { width: 100%; justify-self: stretch; }
+}
