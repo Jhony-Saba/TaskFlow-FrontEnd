@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, NavLink, useLocation } from 'react-router-dom';
+import { useNavigate, NavLink,Navigate, useLocation } from 'react-router-dom';
 import { Email, Password, Username } from '../Components/Inputs.jsx';
 import { RegisterApi, LoginApi } from '../Api_Connections/userApi.js';
 import { TokenManager } from '../Models/ManegeToken.js';
@@ -108,4 +108,9 @@ function Nav(){
   
 
 }
-export { LoginForm, RegisterForm , Nav };
+function ProtectedRoute({ children }) {
+  const isAuthenticated = Boolean(new TokenManager().getToken());
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+export { LoginForm, RegisterForm , Nav,ProtectedRoute };

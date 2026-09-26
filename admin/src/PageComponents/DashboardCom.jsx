@@ -100,7 +100,9 @@ function EditProject({ project }) {
     <form className={style.inlineForm} onSubmit={handleSubmit}>
       <Title title={title} setTitle={setTitle} />
       <Context context={context} setContext={setContext} />
-      <button className={style.primaryButton} type="submit" disabled={isRunning}>{isRunning ? 'Saving...' : 'Save project'}</button>
+      <button className={style.primaryButton} type="submit" disabled={isRunning} aria-busy={isRunning}>
+        {isRunning ? <span className={style.buttonLoadingContent}><span className={style.loadingSpinner} aria-hidden="true" />Saving...</span> : 'Save project'}
+      </button>
       <button className={style.secondaryButton} type="button" onClick={() => setIsEditing(false)} disabled={isRunning}>Cancel</button>
     </form>
   );
@@ -150,24 +152,48 @@ function ProjectStatic({ projectId }) {
 
 function DeleteProject({ projectId }) {
   const { triggerRefresh } = UseProjectContext();
+  const [isRunning, setIsRunning] = useState(false);
 
   const Deleteit = async () => {
-    await DeleteProjectApi(projectId);
-    triggerRefresh();
+    if (isRunning) return;
+
+    setIsRunning(true);
+    try {
+      await DeleteProjectApi(projectId);
+      triggerRefresh();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Unable to delete project');
+    } finally {
+      setIsRunning(false);
+    }
   };
 
-  return <button className={style.iconButton} onClick={Deleteit} aria-label="Delete project">Delete</button>;
+  return (
+    <button className={style.iconButton} onClick={Deleteit} disabled={isRunning} aria-busy={isRunning}>
+      {isRunning ? <span className={style.buttonLoadingContent}><span className={style.loadingSpinner} aria-hidden="true" />Deleting...</span> : 'Delete'}
+    </button>
+  );
 }
 
 function Header() {
   const navigate = useNavigate();
-
+   const [scrolled, setScrolled] = useState(false);
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     navigate('/login', { replace: true });
   };
+
+  useEffect(()=>{
+const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+
+  },[]);
+
   return (
-    <header className={style.header}>
+    <header className={scrolled ? style.scrollHeader : style.header}>
       <Link className={style.logo} to={'/dashboard/projects'}><span>TF</span>TaskFlow</Link>
       <nav className={style.headerNav} aria-label="Dashboard navigation">
         <Link to={'/dashboard/projects'}>Overview</Link>
@@ -186,13 +212,20 @@ function AddProject() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isRunning) return;
+
     setIsRunning(true);
-    const projectData = { title, context };
-    await CreateProject(projectData);
-    triggerRefresh();
-    setTitle('');
-    setContext('');
-    setIsRunning(false);
+    try {
+      const projectData = { title, context };
+      await CreateProject(projectData);
+      triggerRefresh();
+      setTitle('');
+      setContext('');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Unable to create project');
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   return (
@@ -206,8 +239,8 @@ function AddProject() {
       </div>
       <Title title={title} setTitle={setTitle} />
       <Context context={context} setContext={setContext} />
-      <button className={style.primaryButton} type="submit" disabled={isRunning}>
-        {isRunning ? 'Adding project...' : 'Add Project'}
+      <button className={style.primaryButton} type="submit" disabled={isRunning} aria-busy={isRunning}>
+        {isRunning ? <span className={style.buttonLoadingContent}><span className={style.loadingSpinner} aria-hidden="true" />Adding project...</span> : 'Add Project'}
       </button>
     </form>
   );
@@ -222,14 +255,21 @@ function AddTask({ projectId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isRunning) return;
+
     setIsRunning(true);
-    const taskData = { title, projectId, status, deadline };
-    await CreateTask(taskData);
-    triggerRefresh();
-    setTitle('');
-    setStatus('To Do');
-    setDeadline('');
-    setIsRunning(false);
+    try {
+      const taskData = { title, projectId, status, deadline };
+      await CreateTask(taskData);
+      triggerRefresh();
+      setTitle('');
+      setStatus('To Do');
+      setDeadline('');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Unable to create task');
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   return (
@@ -237,8 +277,8 @@ function AddTask({ projectId }) {
       <Title title={title} setTitle={setTitle} />
       <SelectTaskStatus status={status} setStatus={setStatus} />
       <Deadline deadline={deadline} setDeadline={setDeadline} />
-      <button className={style.primaryButton} type="submit" disabled={isRunning}>
-        {isRunning ? 'Adding task' : 'Add Task'}
+      <button className={style.primaryButton} type="submit" disabled={isRunning} aria-busy={isRunning}>
+        {isRunning ? <span className={style.buttonLoadingContent}><span className={style.loadingSpinner} aria-hidden="true" />Adding task...</span> : 'Add Task'}
       </button>
     </form>
   );
@@ -248,6 +288,7 @@ function DisplayTask({ projectId }) {
   const [tasks, setTasks] = useState([]);
   const { refreshKey, triggerRefresh } = UseProjectContext();
   const [isVisible, setIsVisible] = useState(false);
+  const [deletingTaskId, setDeletingTaskId] = useState(null);
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -268,8 +309,17 @@ function DisplayTask({ projectId }) {
   }, [projectId, refreshKey]);
 
   const handleDelete = async (taskId) => {
-    await DeleteTask(taskId);
-    triggerRefresh();
+    if (deletingTaskId) return;
+
+    setDeletingTaskId(taskId);
+    try {
+      await DeleteTask(taskId);
+      triggerRefresh();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Unable to delete task');
+    } finally {
+      setDeletingTaskId(null);
+    }
   };
 
   const handleVisible = () => {
@@ -291,7 +341,9 @@ function DisplayTask({ projectId }) {
             <div className={style.taskActions}>
               <EditTask task={task} />
               
-              <button className={style.textButton} onClick={() => handleDelete(task.id)}>Delete</button>
+              <button className={style.textButton} onClick={() => handleDelete(task.id)} disabled={deletingTaskId !== null} aria-busy={deletingTaskId === task.id}>
+                {deletingTaskId === task.id ? <span className={style.buttonLoadingContent}><span className={style.loadingSpinner} aria-hidden="true" />Deleting...</span> : 'Delete'}
+              </button>
             </div>
           </div>
         ))}
@@ -333,7 +385,9 @@ function EditTask({ task }) {
       <Title title={title} setTitle={setTitle} />
       <SelectTaskStatus status={status} setStatus={setStatus} />
       <Deadline deadline={deadline} setDeadline={setDeadline} />
-      <button className={style.primaryButton} type="submit" disabled={isRunning}>{isRunning ? 'Saving...' : 'Save task'}</button>
+      <button className={style.primaryButton} type="submit" disabled={isRunning} aria-busy={isRunning}>
+        {isRunning ? <span className={style.buttonLoadingContent}><span className={style.loadingSpinner} aria-hidden="true" />Saving...</span> : 'Save task'}
+      </button>
       <button className={style.secondaryButton} type="button" onClick={() => setIsEditing(false)} disabled={isRunning}>Cancel</button>
     </form>
   );

@@ -17,14 +17,37 @@
 		#f4f1eb;
 }
 
-.header {
+.header,
+.scrollHeader {
 	display: flex;
 	align-items: center;
 	gap: 44px;
+	width: 100%;
 	max-width: 1240px;
 	margin: 0 auto;
 	padding: 24px 34px;
 	border-bottom: 1px solid rgba(24, 51, 45, 0.1);
+	transition: 
+  background-color 400ms ease-in-out, 
+  outline 400ms ease-in-out, 
+  padding 300ms ;
+	transition-duration: 0.6s;
+	
+}
+
+.scrollHeader {
+	position: fixed;
+	top: 0;
+	right: 0;
+	left: 0;
+	z-index: 1000;
+	padding-top: 16px;
+	padding-bottom: 16px;
+	background-color: rgba(244, 241, 235, 0.96);
+	
+
+backdrop-filter: saturate(1) blur(1px);
+
 }
 
 .logo {
@@ -112,8 +135,24 @@
 	cursor: pointer;
 }
 
+.buttonLoadingContent { display: inline-flex; align-items: center; gap: 8px; }
+.loadingSpinner {
+	width: 13px;
+	height: 13px;
+	flex: 0 0 13px;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 50%;
+	animation: loadingSpin 700ms linear infinite;
+}
+@keyframes loadingSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+	.loadingSpinner { animation-duration: 1.5s; }
+}
+
 .primaryButton:hover { background: #2b5144; }
 .primaryButton:disabled, .secondaryButton:disabled { cursor: wait; opacity: 0.55; }
+.iconButton:disabled, .textButton:disabled { cursor: wait; opacity: 0.6; }
 
 .projectGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 24px; }
 .emptyState { color: #788981; font: 0.85rem 'Trebuchet MS', sans-serif; }
@@ -164,7 +203,8 @@
 }
 
 @media (max-width: 700px) {
-	.header { gap: 18px; padding: 18px 20px; }
+	.header, .scrollHeader { gap: 18px; padding: 18px 20px; }
+	.scrollHeader { padding-top: 13px; padding-bottom: 13px; }
 	.headerNav { gap: 13px; }
 	.headerNav a { font-size: 0.68rem; }
 	.logoutButton { font-size: 0.68rem; }

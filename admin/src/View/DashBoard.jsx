@@ -1,4 +1,5 @@
-﻿import { DisplayProjects, Header, AddProject, ProjectProvider } from '../PageComponents/DashboardCom';
+﻿import { Route, Routes } from 'react-router-dom';
+import { DisplayProjects, Header, AddProject, ProjectProvider } from '../PageComponents/DashboardCom';
 import style from '../Styles/DashBoard.module.css';
 
 function DashbordPage() {
@@ -15,8 +16,11 @@ function DashbordPage() {
             </div>
             <div className={style.dashboardHeroMark} aria-hidden="true">TF</div>
           </section>
-          <AddProject />
-          <DisplayProjects />
+          <Routes>
+            <Route index element={<DisplayProjects />} />
+            <Route path="add-project" element={<AddProject />} />
+            <Route path="projects" element={<DisplayProjects />} />
+          </Routes>
         </main>
       </ProjectProvider>
     </div>
