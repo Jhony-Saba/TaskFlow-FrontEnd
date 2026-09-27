@@ -34,11 +34,15 @@ function UseProjectContext() {
 function DisplayProjects() {
   const [projects, setProjects] = useState([]);
   const { refreshKey } = UseProjectContext();
+  const [loading, setloading]=useState(false);
 
   useEffect(() => {
+   
     const loadProjects = async () => {
+       setloading(true);
       const data = await getProjects();
       if (data) {
+        setloading(false);
         const mapped = data.map((item) => new Project(item.title, item.context, item._id));
         setProjects(mapped);
       }
@@ -47,10 +51,12 @@ function DisplayProjects() {
     loadProjects();
   }, [refreshKey]);
 
-  return (
+  return (<>
+    {projects.length === 0 && loading && <><div className={style.loadingSpinner}>   </div>  <p>Uploding ...</p></>}
     <section className={style.projectGrid}>
+      
       {projects.length === 0 && <p className={style.emptyState}>No projects yet. Add your first project above.</p>}
-      {projects.map((project) => (
+      {projects.slice(0,9).map((project) => (
         <article className={style.projectCard} key={project.projectid}>
           <div className={style.projectHeading}>
             <div>
@@ -66,6 +72,7 @@ function DisplayProjects() {
         </article>
       ))}
     </section>
+    </>
   );
 }
 
@@ -213,10 +220,19 @@ function AddProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isRunning) return;
+      if (!title || title.trim().length < 3) {
+    alert("Title must be at least 3 characters long");
+    return;
+  }
+  if (!context || context.trim().length < 5) {
+    alert("Context must be at least 5 characters long");
+    return;
+  }
 
     setIsRunning(true);
     try {
       const projectData = { title, context };
+      
       await CreateProject(projectData);
       triggerRefresh();
       setTitle('');

@@ -2,6 +2,7 @@
 import { DisplayProjects, Header, AddProject, ProjectProvider } from '../PageComponents/DashboardCom';
 import style from '../Styles/DashBoard.module.css';
 
+
 function DashbordPage() {
   return (
     <div className={style.dashboardPage}>
@@ -20,6 +21,7 @@ function DashbordPage() {
             <Route index element={<DisplayProjects />} />
             <Route path="add-project" element={<AddProject />} />
             <Route path="projects" element={<DisplayProjects />} />
+            <Route path="*" element={<NotFound/>} />
           </Routes>
         </main>
       </ProjectProvider>
@@ -28,3 +30,6 @@ function DashbordPage() {
 }
 
 export default DashbordPage;
+function NotFound(){
+  return(<><p>Page not <i class="fa fa-cloud-download" aria-hidden="true">found </i></p></>)
+}
