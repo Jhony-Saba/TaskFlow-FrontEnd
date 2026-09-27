@@ -69,7 +69,6 @@ async function LoginApi({ email, password, isRunning, setIsRunning, e, Token, na
 
     Token.setToken(data.Tokenaccess);
     navigate('/dashboard');
-    window.location.href = '/dashboard';
   } catch (error) {
     alert(error.message);
   } finally {

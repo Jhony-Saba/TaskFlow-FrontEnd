@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import {LoginForm,RegisterForm,Nav,ProtectedRoute} from '../PageComponents/LoginCom';
 import DashbordPage from './DashBoard';
 import { TokenManager } from '../Models/ManegeToken';
@@ -11,7 +11,7 @@ function LoginPage() {
 
   return (<>
 
-    <BrowserRouter>
+    <HashRouter>
      <Nav/>
       <Routes>
         <Route path="/login" element={<LoginForm />} />
@@ -25,7 +25,7 @@ function LoginPage() {
           <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
           } />
       </Routes>
-    </BrowserRouter></>
+    </HashRouter></>
   );
 }
 
