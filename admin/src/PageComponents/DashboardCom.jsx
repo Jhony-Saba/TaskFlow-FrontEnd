@@ -127,7 +127,7 @@ function ProjectStatic({ projectId }) {
           setStatics({
             tasks: data.totalTasks,
             toDoTasks: data.ToDoTasks ?? data.toDoTasks,
-            percentage: data.percentage,
+            percentage: data.percentage.toFixed(2),
           });
         }
       } catch (error) {
