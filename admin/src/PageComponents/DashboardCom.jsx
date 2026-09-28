@@ -228,8 +228,7 @@ function AddProject() {
     alert("Context must be at least 5 characters long");
     return;
   }
-
-    setIsRunning(true);
+     setIsRunning(true);
     try {
       const projectData = { title, context };
       
@@ -272,6 +271,9 @@ function AddTask({ projectId }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isRunning) return;
+    if(!title || !projectId ||!status ||!deadline){
+      return
+    }
 
     setIsRunning(true);
     try {
