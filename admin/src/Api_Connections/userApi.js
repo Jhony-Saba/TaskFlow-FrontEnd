@@ -14,7 +14,7 @@ async function readResponse(response) {
   }
 }
 
- async function RegisterApi({ email, username, password, isRunning, setIsRunning, e }) {
+ async function RegisterApi({ email, username, password, isRunning, setIsRunning, e,Token, navigate  }) {
   e.preventDefault();
   if (!email || !username || !password) return;
   if (isRunning) return;
@@ -39,8 +39,8 @@ async function readResponse(response) {
       throw new Error(data.message || 'Registration failed');
     }
 
-    alert('Registration successful');
-    console.log(data);
+     Token.setToken(data.Tokenaccess);
+    navigate('/dashboard');
   } catch (error) {
     alert(error.message);
   } finally {
@@ -51,7 +51,9 @@ async function readResponse(response) {
 async function LoginApi({ email, password, isRunning, setIsRunning, e, Token, navigate }) {
   e.preventDefault();
   if (isRunning) return;
-
+  if (!email || !password) return;
+  if (isRunning) return;
+   
   setIsRunning(true);
 
   try {

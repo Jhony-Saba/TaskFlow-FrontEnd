@@ -4,8 +4,10 @@ import { Email, Password, Username } from '../Components/Inputs.jsx';
 import { RegisterApi, LoginApi } from '../Api_Connections/userApi.js';
 import { TokenManager } from '../Models/ManegeToken.js';
 import style from '../Styles/Inputs.module.css'
+const Token = new TokenManager();
+  
 function LoginForm() {
-  const Token = new TokenManager();
+ 
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,13 +49,14 @@ function LoginForm() {
 }
 
 function RegisterForm() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
   const handleSubmit = async (e) => {
-    await RegisterApi({ email, username, password, isRunning, setIsRunning, e });
+    await RegisterApi({ email, username, password, isRunning, setIsRunning, e,Token, navigate  });
   };
 
   return (
