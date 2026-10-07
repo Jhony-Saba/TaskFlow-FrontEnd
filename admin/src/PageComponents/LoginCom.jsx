@@ -6,15 +6,35 @@ import { TokenManager } from '../Models/ManegeToken.js';
 import style from '../Styles/Inputs.module.css'
 const Token = new TokenManager();
   
+
+
+/**
+*- LoginForm renders the user authentication page.
+*- It manages the email and password input fields, handles
+* login form submission, tracks the login request state,
+* and redirects authenticated users using React Router.
+*- The component also displays TaskFlow branding and a
+* sign-in interface for returning users.
+*/
 function LoginForm() {
  
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isRunning, setIsRunning] = useState(false);
-
+  const [email, setEmail] = useState('');// Store the user's email input
+  const [password, setPassword] = useState('');// Store the user's password input
+  const [isRunning, setIsRunning] = useState(false);// Track whether a login request is currently in progress
+// Handle form submission and authenticate the user
   const handleSubmit = async (e) => {
-    await LoginApi({ email, password, isRunning, setIsRunning, e, Token, navigate });
+  e.preventDefault();
+  if (isRunning) return;
+  if (!email || !password) return;
+  
+   try{
+     setIsRunning(true);
+    await LoginApi({ email, password,  Token, navigate });
+   }catch(error){
+   console.error("Login failed:", error);
+   }finally{
+    setIsRunning(false);}
   };
 
   return (
@@ -47,7 +67,16 @@ function LoginForm() {
     </main>
   );
 }
-
+/**
+* RegisterForm Component
+*
+* Renders the user registration form and handles account creation.
+* Features:
+* - Manages email, username, and password input states.
+* - Prevents duplicate submissions using the isRunning flag.
+* - Validates required fields before submitting.
+* - Calls the registration API and navigates after successful signup.
+*/
 function RegisterForm() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -56,7 +85,14 @@ function RegisterForm() {
   const [isRunning, setIsRunning] = useState(false);
 
   const handleSubmit = async (e) => {
-    await RegisterApi({ email, username, password, isRunning, setIsRunning, e,Token, navigate  });
+      e.preventDefault();
+  if (isRunning) return;
+  if (!email || !password) return;
+  if (isRunning) return;
+   setIsRunning(true);
+    await RegisterApi({ email, username, password,Token, navigate  });
+    setIsRunning(false);
+  
   };
 
   return (
@@ -91,9 +127,18 @@ function RegisterForm() {
   );
 }
 
+/**
+* Nav Component
+*
+* Displays navigation links for authentication pages.
+* - Hides the navigation when the user is on the dashboard page.
+* - Shows "Login" and "Sign up" links on the login and signup pages.
+* - Highlights the active link using React Router's NavLink.
+*/
 function Nav(){
+  //check where is the location of the user 
   const location = useLocation();
-
+ //Hides the navigation when the user is on the dashboard page.
   if (location.pathname === '/dashboard') {
     return null;
   }
@@ -108,9 +153,20 @@ function Nav(){
       </NavLink>
     </nav>
   )
-  
-
 }
+
+/**
+* ProtectedRoute Component
+*
+* Protects routes that require user authentication.
+* - Checks if a valid authentication token exists.
+* - If the user is authenticated, renders the protected content.
+* - If the user is not authenticated, redirects them to the login page.
+*
+* @param {Object} props - Component props.
+* @param {React.ReactNode} props.children - The protected component(s) to render.
+* @returns {React.ReactNode} Protected content or a redirect to the login page.
+*/
 function ProtectedRoute({ children }) {
   const isAuthenticated = Boolean(new TokenManager().getToken());
 

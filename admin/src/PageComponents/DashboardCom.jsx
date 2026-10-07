@@ -9,9 +9,16 @@ import style from '../Styles/DashBoard.module.css'
 
 const ProjectContext = createContext(null);
 
+/**
+ * Provides project refresh state to nested dashboard components.
+ * Child components can trigger a data refresh by incrementing the shared context key.
+ */
 function ProjectProvider({ children }) {
   const [refreshKey, setRefreshKey] = useState(0);
 
+  /**
+   * Increments the shared refresh value so consumers reload project-related data.
+   */
   const triggerRefresh = () => {
     setRefreshKey((prev) => prev + 1);
   };
@@ -21,6 +28,9 @@ function ProjectProvider({ children }) {
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
 }
 
+/**
+ * Reads the shared project context and guards against misuse outside the provider.
+ */
 function UseProjectContext() {
   const context = useContext(ProjectContext);
 
@@ -31,13 +41,18 @@ function UseProjectContext() {
   return context;
 }
 
+/**
+ * Fetches and displays all projects in the dashboard grid.
+ */
 function DisplayProjects() {
   const [projects, setProjects] = useState([]);
   const { refreshKey } = UseProjectContext();
   const [loading, setloading]=useState(false);
 
   useEffect(() => {
-   
+    /**
+     * Loads the current project list from the API and maps the response into project model objects.
+     */
     const loadProjects = async () => {
        setloading(true);
       const data = await getProjects();
@@ -52,10 +67,13 @@ function DisplayProjects() {
   }, [refreshKey]);
 
   return (<>
-    {projects.length === 0 && loading && <><div className={style.loadingSpinner}>   </div>  <p>Uploding ...</p></>}
+    {projects.length === 0 && loading && <>
+    <div className={style.loadingSpinner}></div> 
+         <p>Uploding ...</p></>}
     <section className={style.projectGrid}>
       
-      {projects.length === 0 && <p className={style.emptyState}>No projects yet. Add your first project above.</p>}
+      {projects.length === 0 && 
+      <p className={style.emptyState}>No projects yet. Add your first project above.</p>}
       {projects.slice(0,9).map((project) => (
         <article className={style.projectCard} key={project.projectid}>
           <div className={style.projectHeading}>
@@ -76,6 +94,9 @@ function DisplayProjects() {
   );
 }
 
+/**
+ * Renders an editable project form and updates the selected project when the form is submitted.
+ */
 function EditProject({ project }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(project.title);
@@ -83,6 +104,9 @@ function EditProject({ project }) {
   const [isRunning, setIsRunning] = useState(false);
   const { triggerRefresh } = UseProjectContext();
 
+  /**
+   * Sends the updated project fields to the API and refreshes the project list on success.
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!title.trim() || isRunning) return;
@@ -115,11 +139,17 @@ function EditProject({ project }) {
   );
 }
 
+/**
+ * Displays task completion statistics for a single project card.
+ */
 function ProjectStatic({ projectId }) {
   const [statics, setStatics] = useState(null);
   const { refreshKey } = UseProjectContext();
 
   useEffect(() => {
+    /**
+     * Fetches the latest task statistics for the given project and updates the UI summary.
+     */
     const loadProjects = async () => {
       try {
         const data = await getTasksStatistics(projectId);
@@ -157,10 +187,16 @@ function ProjectStatic({ projectId }) {
   );
 }
 
+/**
+ * Deletes a project and triggers a refresh to update the dashboard list.
+ */
 function DeleteProject({ projectId }) {
   const { triggerRefresh } = UseProjectContext();
   const [isRunning, setIsRunning] = useState(false);
 
+  /**
+   * Sends the delete request for the selected project and refreshes view state afterward.
+   */
   const Deleteit = async () => {
     if (isRunning) return;
 
@@ -182,15 +218,24 @@ function DeleteProject({ projectId }) {
   );
 }
 
+/**
+ * Renders the dashboard header with navigation and logout functionality.
+ */
 function Header() {
   const navigate = useNavigate();
    const [scrolled, setScrolled] = useState(false);
+  /**
+   * Clears the auth token and redirects the user back to the login screen.
+   */
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     navigate('/login', { replace: true });
   };
 
   useEffect(()=>{
+    /**
+     * Updates the header state when the page is scrolled to adjust styling.
+     */
 const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
@@ -211,12 +256,18 @@ const handleScroll = () => {
   );
 }
 
+/**
+ * Creates a new project from the form input and refreshes the list on success.
+ */
 function AddProject() {
   const [title, setTitle] = useState('');
   const [context, setContext] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const { triggerRefresh } = UseProjectContext();
 
+  /**
+   * Validates the project fields, sends the project to the API, and resets the form.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isRunning) return;
@@ -261,6 +312,9 @@ function AddProject() {
   );
 }
 
+/**
+ * Adds a new task to a project using the task form values.
+ */
 function AddTask({ projectId }) {
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('To Do');
@@ -268,12 +322,14 @@ function AddTask({ projectId }) {
   const [isRunning, setIsRunning] = useState(false);
   const { triggerRefresh } = UseProjectContext();
 
-  const handleSubmit = async (e) => {
+  /**
+   * Validates required task fields, submits the task to the API, and clears the form.
+   */
+const handleSubmit = async (e) => {
     e.preventDefault();
     if (isRunning) return;
-    if(!title || !projectId ||!status ||!deadline){
-      return
-    }
+    if(!title || !projectId ||!status ||!deadline) return
+
 
     setIsRunning(true);
     try {
@@ -302,6 +358,9 @@ function AddTask({ projectId }) {
   );
 }
 
+/**
+ * Displays all tasks belonging to a project and supports task visibility toggling.
+ */
 function DisplayTask({ projectId }) {
   const [tasks, setTasks] = useState([]);
   const { refreshKey, triggerRefresh } = UseProjectContext();
@@ -309,6 +368,9 @@ function DisplayTask({ projectId }) {
   const [deletingTaskId, setDeletingTaskId] = useState(null);
 
   useEffect(() => {
+    /**
+     * Loads the project tasks from the backend and maps them to the task model.
+     */
     const loadTasks = async () => {
       try {
         const data = await getTasks(projectId);
@@ -326,6 +388,9 @@ function DisplayTask({ projectId }) {
     loadTasks();
   }, [projectId, refreshKey]);
 
+  /**
+   * Removes a task and refreshes the list after a successful delete.
+   */
   const handleDelete = async (taskId) => {
     if (deletingTaskId) return;
 
@@ -340,6 +405,9 @@ function DisplayTask({ projectId }) {
     }
   };
 
+  /**
+   * Toggles the task section open and closed so users can view or hide task details.
+   */
   const handleVisible = () => {
     setIsVisible((prev) => !prev);
   };
@@ -347,7 +415,7 @@ function DisplayTask({ projectId }) {
   return (
     <div className={style.taskSection}>
       <button className={style.taskToggle} onClick={handleVisible} aria-expanded={isVisible}>
-        {isVisible ? 'Hide tasks' : 'View tasks'} <span>{isVisible ? '−' : '+'}</span>
+        {isVisible ? 'Hide tasks' : 'View tasks'} <span>{isVisible ? '^' : '+'}</span>
       </button>
       <div className={style.taskBody} hidden={!isVisible}>
         <AddTask projectId={projectId} />
@@ -370,6 +438,9 @@ function DisplayTask({ projectId }) {
   );
 }
 
+/**
+ * Allows a task's title, status, and deadline to be updated inline.
+ */
 function EditTask({ task }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
@@ -378,6 +449,9 @@ function EditTask({ task }) {
   const [isRunning, setIsRunning] = useState(false);
   const { triggerRefresh } = UseProjectContext();
 
+  /**
+   * Submits the edited task data to the backend and refreshes the task list.
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!title.trim() || isRunning) return;
@@ -411,8 +485,15 @@ function EditTask({ task }) {
   );
 }
 
+/**
+ * Converts a raw deadline value to a compact YYYY-MM-DD string when present.
+ */
 function formatDeadline(deadline) {
   return deadline ? String(deadline).slice(0, 10) : '';
 }
 
-export { DisplayProjects, Header, AddProject, ProjectProvider, UseProjectContext };
+export { DisplayProjects,
+     Header,
+     AddProject, 
+     ProjectProvider, 
+     UseProjectContext };

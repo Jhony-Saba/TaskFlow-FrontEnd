@@ -2,7 +2,20 @@
 import { DisplayProjects, Header, AddProject, ProjectProvider } from '../PageComponents/DashboardCom';
 import style from '../Styles/DashBoard.module.css';
 
-
+/**
+* DashboardPage is the main workspace page of the application.
+*
+* It wraps all dashboard-related components with the ProjectProvider
+* so project data can be shared across the dashboard.
+*
+* Features:
+* - Displays the application header.
+* - Shows a hero section with a workspace overview message.
+* - Handles dashboard routing using React Router.
+* - Renders the project list by default.
+* - Provides a route for adding new projects.
+* - Displays a NotFound page for invalid dashboard routes.
+*/
 function DashbordPage() {
   return (
     <div className={style.dashboardPage}>

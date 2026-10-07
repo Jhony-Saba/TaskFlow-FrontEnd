@@ -13,13 +13,28 @@ async function readResponse(response) {
     return { message: body };
   }
 }
-
- async function RegisterApi({ email, username, password, isRunning, setIsRunning, e,Token, navigate  }) {
-  e.preventDefault();
-  if (!email || !username || !password) return;
-  if (isRunning) return;
-
-  setIsRunning(true);
+/**
+* Registers a new user by sending their details to the API.
+*
+* @param {Object} params - Function parameters.
+* @param {string} params.email - User's email address.
+* @param {string} params.username - User's username.
+* @param {string} params.password - User's password.
+* @param {Object} params.Token - Token management object used to store the access token.
+* @param {Function} params.navigate - React Router navigation function.
+*
+* @returns {Promise<void>} Resolves when registration is completed.
+*
+* Flow:
+* 1. Sends a POST request to the registration endpoint.
+* 2. Creates a new user with the 'admin' role.
+* 3. Reads and validates the API response.
+* 4. Saves the returned access token.
+* 5. Redirects the user to the dashboard on success.
+* 6. Displays an error message if registration fails.
+*/
+ async function RegisterApi({ email, username, password,Token, navigate  }) {
+  
 
   try {
     const response = await fetch(`${API_URL}/user/register`, {
@@ -43,18 +58,28 @@ async function readResponse(response) {
     navigate('/dashboard');
   } catch (error) {
     alert(error.message);
-  } finally {
-    setIsRunning(false);
-  }
+  } 
 }
+/**
+* Authenticates a user by sending their login credentials to the API.
+*
+* @param {Object} params - Function parameters.
+* @param {string} params.email - User's email address.
+* @param {string} params.password - User's password.
+* @param {Object} params.Token - Token management object used to store the access token.
+* @param {Function} params.navigate - React Router navigation function.
+*
+* @returns {Promise<void>} Resolves when the login process is completed.
+*
+* Flow:
+* 1. Sends a POST request to the login endpoint.
+* 2. Validates the server response.
+* 3. Stores the returned access token.
+* 4. Redirects the user to the dashboard upon successful login.
+* 5. Displays an error message if authentication fails.
+*/
+async function LoginApi({ email, password,   Token, navigate }) {
 
-async function LoginApi({ email, password, isRunning, setIsRunning, e, Token, navigate }) {
-  e.preventDefault();
-  if (isRunning) return;
-  if (!email || !password) return;
-  if (isRunning) return;
-   
-  setIsRunning(true);
 
   try {
     const response = await fetch(`${API_URL}/user/login`, {
@@ -73,9 +98,7 @@ async function LoginApi({ email, password, isRunning, setIsRunning, e, Token, na
     navigate('/dashboard');
   } catch (error) {
     alert(error.message);
-  } finally {
-    setIsRunning(false);
-  }
+  } 
 }
 
 export { RegisterApi, LoginApi };
