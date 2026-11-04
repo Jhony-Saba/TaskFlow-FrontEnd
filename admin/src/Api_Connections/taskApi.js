@@ -2,6 +2,7 @@ import axios from 'axios';
 import { TokenManager } from '../Models/ManegeToken';
 const API_URL = import.meta.env.VITE_APP_API_URL;
 const Token = new TokenManager();
+ Token.setKey('Auth');;
 
 /**
  * Fetches all tasks belonging to a specific project.

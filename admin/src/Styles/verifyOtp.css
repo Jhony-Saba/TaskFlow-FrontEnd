@@ -1,0 +1,186 @@
+.otp-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 40px 24px;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(240, 195, 106, 0.45), transparent 27%),
+    linear-gradient(135deg, #f5f0e8 0%, #e9efe7 100%);
+  color: #18332d;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.otp-card {
+  width: min(100%, 445px);
+  padding: clamp(30px, 5vw, 48px);
+  border: 1px solid rgba(24, 51, 45, 0.1);
+  border-radius: 24px;
+  background: rgba(255, 252, 247, 0.9);
+  box-shadow: 0 24px 70px rgba(37, 62, 54, 0.12);
+  text-align: center;
+}
+
+.otp-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.otp-circle {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  border: 1px solid rgba(217, 153, 53, 0.55);
+  border-radius: 22px 22px 22px 6px;
+  background: #f7edda;
+}
+
+.otp-inner {
+  color: #18332d;
+  font: 700 0.78rem/1 'Trebuchet MS', sans-serif;
+  letter-spacing: 0.12em;
+}
+
+.otp-card h2 {
+  margin: 0;
+  color: #18332d;
+  font-size: clamp(1.7rem, 5vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.otp-description {
+  max-width: 340px;
+  margin: 12px auto 28px;
+  color: #64746e;
+  font: 0.9rem/1.65 'Trebuchet MS', sans-serif;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: clamp(7px, 2vw, 12px);
+  margin-bottom: 22px;
+}
+
+.otp-inputs input {
+  width: clamp(38px, 11vw, 48px);
+  height: clamp(48px, 13vw, 56px);
+  border: 1px solid #d4ddd6;
+  border-radius: 10px;
+  outline: none;
+  color: #18332d;
+  background: #fffdf9;
+  font: 600 1.2rem 'Trebuchet MS', sans-serif;
+  text-align: center;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.otp-inputs input:focus {
+  border-color: #d99935;
+  box-shadow: 0 0 0 4px rgba(217, 153, 53, 0.14);
+}
+
+.resend-text {
+  margin-bottom: 22px;
+  color: #81908b;
+  font: 0.8rem/1.5 'Trebuchet MS', sans-serif;
+}
+
+.resend-text button {
+  margin-left: 5px;
+  padding: 0;
+  border: 0;
+  color: #a76e1d;
+  background: transparent;
+  font: 700 0.8rem/1.5 'Trebuchet MS', sans-serif;
+  cursor: pointer;
+}
+
+.resend-text button:hover {
+  color: #18332d;
+  text-decoration: underline;
+}
+
+.resend-text button:disabled {
+  color: #81908b;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.otp-timer {
+  margin-left: 4px;
+  color: #18332d;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.verify-btn {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 10px;
+  color: #fffaf0;
+  background: #18332d;
+  font: 700 0.88rem 'Trebuchet MS', sans-serif;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.verify-btn:hover {
+  transform: translateY(-1px);
+  background: #2b5144;
+  box-shadow: 0 8px 18px rgba(24, 51, 45, 0.18);
+}
+
+.verify-btn:disabled {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+.verify-btn:focus-visible,
+.resend-text button:focus-visible {
+  outline: 3px solid rgba(217, 153, 53, 0.55);
+  outline-offset: 3px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 2px solid rgba(255, 250, 240, 0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.otp-message {
+  margin: 0 0 16px;
+  color: #64746e;
+  font: 0.8rem/1.5 'Trebuchet MS', sans-serif;
+}
+
+@media (max-width: 400px) {
+  .otp-page {
+    padding: 24px 16px;
+  }
+
+  .otp-card {
+    padding: 30px 20px;
+  }
+
+  .otp-description {
+    font-size: 0.82rem;
+  }
+}

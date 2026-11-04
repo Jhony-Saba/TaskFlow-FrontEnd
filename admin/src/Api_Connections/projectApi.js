@@ -2,6 +2,7 @@ import axios from 'axios';
 import { TokenManager } from '../Models/ManegeToken';
 
 const Token = new TokenManager();
+ Token.setKey('Auth');
 const API_URL = import.meta.env.VITE_APP_API_URL;
 
 
@@ -14,6 +15,7 @@ const API_URL = import.meta.env.VITE_APP_API_URL;
 async function getProjects() {
  
   try {
+    
     const response = await axios.get(`${API_URL}/project`, {
       headers: {
         Authorization: `Bearer ${Token.getToken()}`,

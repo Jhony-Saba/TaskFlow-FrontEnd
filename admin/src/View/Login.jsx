@@ -1,5 +1,5 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
-import {LoginForm,RegisterForm,Nav,ProtectedRoute} from '../PageComponents/LoginCom';
+import {LoginForm,RegisterForm,Nav,ProtectedRoute,VerifyOTP } from '../PageComponents/LoginCom';
 import DashbordPage from './DashBoard';
 import { TokenManager } from '../Models/ManegeToken';
 
@@ -29,6 +29,7 @@ function LoginPage() {
         <Route path="/login" element={<LoginForm />} />
 {/* Route for the registration/sign-up page */}
         <Route path="/signup" element={<RegisterForm />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
 {/* Protected dashboard route */}
 {/* Users must be authenticated to access DashboardPage */}
         <Route path="/dashboard/*"

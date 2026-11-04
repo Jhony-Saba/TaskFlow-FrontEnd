@@ -1,3 +1,5 @@
+import{ TokenManager } from '../Models/ManegeToken'
+const Token = new  TokenManager ();
 
  
 const API_URL = import.meta.env.VITE_APP_API_URL;
@@ -33,11 +35,11 @@ async function readResponse(response) {
 * 5. Redirects the user to the dashboard on success.
 * 6. Displays an error message if registration fails.
 */
- async function RegisterApi({ email, username, password,Token, navigate  }) {
+ async function RegisterApi({ email, username, password, navigate  }) {
   
 
   try {
-    const response = await fetch(`${API_URL}/user/register`, {
+    const response = await fetch(`${API_URL}/user/register/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -49,17 +51,59 @@ async function readResponse(response) {
     });
 
     const data = await readResponse(response);
-
-    if (!response.ok) {
+    if (data.success===false || !response.ok) {
       throw new Error(data.message || 'Registration failed');
     }
-
-     Token.setToken(data.Tokenaccess);
-    navigate('/dashboard');
+     Token.setKey('otpToken');
+     Token.setToken(data.accessToken);
+    navigate('/verify-otp');
   } catch (error) {
     alert(error.message);
   } 
 }
+  async function ResendOtpApi(){
+  Token.setKey('otpToken');
+const response= await fetch(`${API_URL}/user/register/resend`,{
+method:'POST',
+headers:{
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${Token.getToken()}`},
+});
+const data = await readResponse(response);
+
+    if ( !response.ok) {
+      throw new Error(data.message || 'Registration failed');
+    }
+    return data;
+}
+async function VerifyOtpApi(otp,navigate){
+      Token.setKey('otpToken');
+    const response = await fetch(`${API_URL}/user/register/verify`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      'Authorization': `Bearer ${Token.getToken()}`,
+      },
+      body: JSON.stringify({
+        otp,
+      }),
+    });
+
+    const data = await readResponse(response);
+
+    if ( !response.ok) {
+      throw new Error(data.message || 'Registration failed');
+    }
+Token.setKey('Auth');   
+Token.setToken(data.Tokenaccess)
+  navigate('/Dashboard'); 
+  return data;
+}
+
+
+
+
+
 /**
 * Authenticates a user by sending their login credentials to the API.
 *
@@ -78,7 +122,7 @@ async function readResponse(response) {
 * 4. Redirects the user to the dashboard upon successful login.
 * 5. Displays an error message if authentication fails.
 */
-async function LoginApi({ email, password,   Token, navigate }) {
+async function LoginApi({ email, password, navigate }) {
 
 
   try {
@@ -93,7 +137,7 @@ async function LoginApi({ email, password,   Token, navigate }) {
     if (!response.ok) {
       throw new Error(data.message || 'Login failed');
     }
-
+    Token.setKey('Auth');
     Token.setToken(data.Tokenaccess);
     navigate('/dashboard');
   } catch (error) {
@@ -101,4 +145,4 @@ async function LoginApi({ email, password,   Token, navigate }) {
   } 
 }
 
-export { RegisterApi, LoginApi };
+export { RegisterApi, LoginApi,VerifyOtpApi,ResendOtpApi };

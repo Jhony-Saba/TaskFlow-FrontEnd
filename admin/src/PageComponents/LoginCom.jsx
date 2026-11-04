@@ -1,13 +1,12 @@
-import { useState } from 'react';
+import { useState,useRef,useEffect } from 'react';
 import { useNavigate, NavLink,Navigate, useLocation } from 'react-router-dom';
 import { Email, Password, Username } from '../Components/Inputs.jsx';
-import { RegisterApi, LoginApi } from '../Api_Connections/userApi.js';
+import { RegisterApi, LoginApi, VerifyOtpApi,ResendOtpApi } from '../Api_Connections/userApi.js';
 import { TokenManager } from '../Models/ManegeToken.js';
 import style from '../Styles/Inputs.module.css'
+import "../Styles/VerifyOTP.css";
 const Token = new TokenManager();
   
-
-
 /**
 *- LoginForm renders the user authentication page.
 *- It manages the email and password input fields, handles
@@ -17,7 +16,6 @@ const Token = new TokenManager();
 * sign-in interface for returning users.
 */
 function LoginForm() {
- 
   const navigate = useNavigate();
   const [email, setEmail] = useState('');// Store the user's email input
   const [password, setPassword] = useState('');// Store the user's password input
@@ -30,7 +28,7 @@ function LoginForm() {
   
    try{
      setIsRunning(true);
-    await LoginApi({ email, password,  Token, navigate });
+    await LoginApi({ email, password,navigate });
    }catch(error){
    console.error("Login failed:", error);
    }finally{
@@ -90,7 +88,7 @@ function RegisterForm() {
   if (!email || !password) return;
   if (isRunning) return;
    setIsRunning(true);
-    await RegisterApi({ email, username, password,Token, navigate  });
+    await RegisterApi({ email, username, password, navigate  });
     setIsRunning(false);
   
   };
@@ -168,8 +166,266 @@ function Nav(){
 * @returns {React.ReactNode} Protected content or a redirect to the login page.
 */
 function ProtectedRoute({ children }) {
-  const isAuthenticated = Boolean(new TokenManager().getToken());
+   Token.setKey('Auth');
+  const isAuthenticated = Boolean(Token.getToken());
 
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
-export { LoginForm, RegisterForm , Nav,ProtectedRoute };
+
+
+
+
+
+function VerifyOTP() {
+  const isRunning = useRef(false); // Ref to track if a verification request is in progress
+  const navigate = useNavigate();
+  //array to store the 6 digits of the OTP
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  //Error  message
+  const [message, setMessage] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [secondsRemaining, setSecondsRemaining] = useState(600);
+  const [timerResetKey, setTimerResetKey] = useState(0);
+  const resendInProgress = useRef(false);
+  //input references to manage focus between OTP input fields
+  const inputsRef = useRef([]);
+
+  useEffect(() => {
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    let intervalId;
+    const updateCountdown = () => {
+      const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      setSecondsRemaining(remaining);
+      if (remaining === 0) window.clearInterval(intervalId);
+    };
+
+    intervalId = window.setInterval(updateCountdown, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [timerResetKey]);
+
+  const handleChange = (value, index) => {
+    //Checks that the user enters only numbers
+    if (!/^\d*$/.test(value)) return;
+    
+  //Copy the OTP array
+    const newOtp = [...otp];
+  //Update the specific position
+    newOtp[index] = value.slice(-1);
+//Updates React state using setOtp().
+    setOtp(newOtp);
+    setMessage("");
+//move to the new  input field if the user has entered a digit and the current index is less than 5
+    if (value && index < 5) {
+      inputsRef.current[index + 1].focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+  
+    // Check if the user pressed Backspace,
+  // the current input is empty, and this is not the first input.
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+          // Move the cursor (focus) to the previous input.
+      inputsRef.current[index - 1].focus();
+    }
+
+  // Check if the user pressed the left arrow
+  // and the current input is not the first one.
+    if (e.key === "ArrowLeft" && index > 0) {
+       // Move focus to the previous input.
+      inputsRef.current[index - 1].focus();
+    }
+  // Check if the user pressed the right arrow
+  // and the current input is not the last one (index 5).
+    if (e.key === "ArrowRight" && index < 5) {
+  // Move focus to the next input.
+      inputsRef.current[index + 1].focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    // Stop the browser from pasting all the text into one input.
+    e.preventDefault();
+
+ // Get the copied text.
+  // Remove anything that is not a digit.
+  // Keep only the first 6 digits.
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+  // Create an array containing 6 empty strings.
+    const newOtp = Array(6).fill("");
+
+ // Split the pasted text into individual digits.
+  // Store each digit in its corresponding array position.
+    pasted.split("").forEach((digit, index) => {
+      newOtp[index] = digit;
+    });
+// Update the OTP state in React.
+    setOtp(newOtp);
+
+ // Calculate the index of the input that should receive focus.
+// The maximum index is 5 because there are 6 inputs.
+    const nextIndex = Math.min(pasted.length, 5);
+    inputsRef.current[nextIndex]?.focus();
+  };
+
+  const verifyOTP = async () => {
+
+    if(isRunning.current) return; // Prevent multiple submissions
+    const enteredOTP = otp.join("");
+   
+    if (enteredOTP.length !== 6) {
+      setMessage("Please enter all 6 digits.");
+      return;
+    }
+
+    isRunning.current = true;
+    setIsVerifying(true);
+
+    // Send enteredOTP to your backend for verification
+    try {
+      await VerifyOtpApi(enteredOTP,navigate);
+      setMessage("OTP verified successfully!");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to verify OTP. Please try again.");
+    } finally {
+      isRunning.current = false;
+      setIsVerifying(false);
+    }
+  };
+
+  const resendOTP = async () => {
+    if (resendInProgress.current || secondsRemaining > 0) return;
+
+    resendInProgress.current = true;
+    setIsResending(true);
+    setMessage("");
+    try {
+      await ResendOtpApi();
+      setOtp(["", "", "", "", "", ""]);
+      setSecondsRemaining(600);
+      setTimerResetKey((key) => key + 1);
+      setMessage("A new OTP has been sent.");
+      inputsRef.current[0]?.focus();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to resend OTP. Please try again.");
+    } finally {
+      resendInProgress.current = false;
+      setIsResending(false);
+    }
+  };
+
+  return (
+    <div className="otp-page">
+
+      <div className="otp-card">
+
+        {/* OTP Icon */}
+        <div className="otp-icon">
+          <div className="otp-circle">
+            <div className="otp-inner">
+              OTP
+            </div>
+          </div>
+        </div>
+
+        {/* Title */}
+        <h2>Verify OTP</h2>
+
+        <p className="otp-description">
+          Enter the 6-digit code sent to your email address. 
+          If you didn't receive it, you can request a new one.
+          you have 10 minutes to enter the code before it expires.
+        </p>
+
+        {/* OTP Inputs */}
+        <div className="otp-inputs">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              type="text"
+              inputMode="numeric"
+              maxLength="1"
+              value={digit}
+              ref={(el) => (inputsRef.current[index] = el)}
+              onChange={(e) =>
+                handleChange(e.target.value, index)
+              }
+              onKeyDown={(e) =>
+                handleKeyDown(e, index)
+              }
+              onPaste={handlePaste}
+              aria-label={`OTP digit ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Resend OTP */}
+        <div className="resend-text">
+          {secondsRemaining > 0 ? (
+            <>Didn't receive code? Resend available in <Timer seconds={secondsRemaining} /></>
+          ) : (
+            "Didn't receive code?"
+          )}
+          <button type="button" onClick={resendOTP} disabled={secondsRemaining > 0 || isResending}>
+            {isResending ? "Sending..." : "Resend OTP"}
+          </button>
+        </div>
+
+        {/* Message */}
+        {message && (
+          <p className="otp-message" role="status">{message}</p>
+        )}
+
+        {/* Verify Button */}
+        <button
+          className="verify-btn"
+          onClick={verifyOTP}
+          disabled={isVerifying}
+          aria-busy={isVerifying}
+        >
+          {isVerifying && <span className="spinner" aria-hidden="true" />}
+          {isVerifying ? "Verifying..." : "Verify OTP"}
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function Timer({ seconds }) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return (
+    <span className="otp-timer" aria-live="polite">
+      {String(minutes).padStart(2, "0")}:{String(remainingSeconds).padStart(2, "0")}
+    </span>
+  );
+}
+
+export default Timer;
+
+
+
+
+
+
+
+export { LoginForm, RegisterForm , Nav,ProtectedRoute,VerifyOTP  };
